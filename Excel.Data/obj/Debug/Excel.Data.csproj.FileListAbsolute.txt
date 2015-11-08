@@ -1,5 +1,0 @@
-C:\Users\Michael\Code\ExcelDataProvider\Excel.Data\bin\Debug\Excel.Data.dll
-C:\Users\Michael\Code\ExcelDataProvider\Excel.Data\bin\Debug\Excel.Data.pdb
-C:\Users\Michael\Code\ExcelDataProvider\Excel.Data\obj\Debug\Excel.Data.csprojResolveAssemblyReference.cache
-C:\Users\Michael\Code\ExcelDataProvider\Excel.Data\obj\Debug\Excel.Data.dll
-C:\Users\Michael\Code\ExcelDataProvider\Excel.Data\obj\Debug\Excel.Data.pdb

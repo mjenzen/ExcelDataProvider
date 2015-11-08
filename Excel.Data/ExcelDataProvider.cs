@@ -117,6 +117,9 @@ namespace Excel.Data
             if (propertyType == typeof(long?))
                 return String.IsNullOrEmpty(value) ? null : (long?)long.Parse(value);
 
+            if (propertyType == typeof(bool))
+                return bool.Parse(value);
+
             throw new NotImplementedException("Unsupported Type " + propertyType.Name);
         }
 
