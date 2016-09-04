@@ -18,7 +18,13 @@ namespace Excel.Data
 
         protected ExcelDataProvider(string filePath)
         {
-            application = new MsExcel.Application() { Visible = true };
+            application = new MsExcel.Application() { Visible = false };
+            dataSource = application.Workbooks.Open(filePath);
+        }
+
+        protected ExcelDataProvider(string filePath, bool showWindow)
+        {
+            application = new MsExcel.Application() { Visible = showWindow };
             dataSource = application.Workbooks.Open(filePath);
         }
 
@@ -37,17 +43,27 @@ namespace Excel.Data
 
             for (int row = 2; row <= range.Rows.Count; row++)
             {
-                IDictionary<string, object> dynamicObject = new ExpandoObject();
-
-                foreach (var keyValue in ValueMap)
+                TEntity nextObject;
+                try
                 {
-                    object val = range.Cells[row, keyValue.Key].value2;
-                    string value = val == null ? "" : val.ToString();
+                    IDictionary<string, object> dynamicObject = new ExpandoObject();
 
-                    dynamicObject[keyValue.Value] = value;
+                    foreach (var keyValue in ValueMap)
+                    {
+                        object val = range.Cells[row, keyValue.Key].value2;
+                        string value = val == null ? "" : val.ToString();
+
+                        dynamicObject[keyValue.Value] = value;
+                    }
+
+                    nextObject = BuildObject<TEntity>(dynamicObject);
+                }
+                catch(Exception ex)
+                {
+                    throw new FormatException($"An error has occurred while parsing row: {row}" + ex.Message, ex);
                 }
 
-                yield return BuildObject<TEntity>(dynamicObject);
+                yield return nextObject;
             }
         }
 
@@ -69,13 +85,20 @@ namespace Excel.Data
 
             foreach (var property in newObject.GetType().GetProperties())
             {
-                object value;
-                if (dynamicObject.TryGetValue(property.Name, out value))
+                try
                 {
-                    var parameter = Expression.Parameter(value.GetType());
-                    var typedValue = ConvertValue(value.ToString(), property.PropertyType);
+                    object value;
+                    if (dynamicObject.TryGetValue(property.Name, out value))
+                    {
+                        var parameter = Expression.Parameter(value.GetType());
+                        var typedValue = ConvertValue(value.ToString(), property.PropertyType);
 
-                    property.SetValue(newObject, typedValue);
+                        property.SetValue(newObject, typedValue);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    throw new Exception($" property: {property}.", ex);
                 }
             }
 
